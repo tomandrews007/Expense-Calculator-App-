@@ -1,7 +1,6 @@
 {
   "name": "expense-splitter",
   "private": true,
-   "homepage": "https://tomandrews007.github.io/Expense-Calculator-App-",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
