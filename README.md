@@ -1,1 +1,1 @@
-# Expense-Calculator-App-
+Simple Expense Calculator App
