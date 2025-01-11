@@ -15,7 +15,7 @@ import { motion } from 'framer-motion'
 
 const MotionListItem = motion(ListItem)
 
-function SettlementPlan({ settlements }) {
+function SettlementPlan({ settlements, currencySymbol }) {
   const total = settlements.reduce((sum, s) => sum + s.amount, 0)
   const bgColor = useColorModeValue('white', 'gray.700')
   const headingColor = useColorModeValue('blue.700', 'blue.200')
@@ -31,7 +31,7 @@ function SettlementPlan({ settlements }) {
           Settlement Plan
         </Text>
         <Text textAlign="center" color={useColorModeValue('gray.600', 'gray.300')}>
-          Total Amount: ${total.toFixed(2)}
+          Total Amount: {currencySymbol}{total.toFixed(2)}
         </Text>
         <Divider />
         <List spacing={3}>
@@ -54,7 +54,7 @@ function SettlementPlan({ settlements }) {
                 <HStack spacing={2}>
                   <Icon as={FaArrowRight} color={textColor} />
                   <Text fontWeight="bold" color={amountColor}>
-                    ${settlement.amount.toFixed(2)}
+                    {currencySymbol}{settlement.amount.toFixed(2)}
                   </Text>
                 </HStack>
                 <Text fontWeight="medium" color={textColor}>

@@ -10,12 +10,12 @@ import {
   InputLeftElement,
   useColorModeValue
 } from '@chakra-ui/react'
-import { FaPlus, FaTrash, FaUser, FaDollarSign } from 'react-icons/fa'
+import { FaPlus, FaTrash, FaUser } from 'react-icons/fa'
 import { motion } from 'framer-motion'
 
 const MotionBox = motion(Box)
 
-function ParticipantList({ participants, setParticipants }) {
+function ParticipantList({ participants, setParticipants, currencySymbol }) {
   const bgColor = useColorModeValue('white', 'gray.700')
   const iconColor = useColorModeValue('gray.400', 'gray.500')
   const headingColor = useColorModeValue('blue.700', 'blue.200')
@@ -62,7 +62,7 @@ function ParticipantList({ participants, setParticipants }) {
             </InputGroup>
             <InputGroup>
               <InputLeftElement>
-                <FaDollarSign color={iconColor} />
+                <Text color={iconColor}>{currencySymbol}</Text>
               </InputLeftElement>
               <Input
                 placeholder="Amount"
