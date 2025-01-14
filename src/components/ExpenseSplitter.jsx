@@ -11,9 +11,11 @@ import React, { useState, useEffect, useRef } from 'react'
       HStack,
       Tooltip,
       IconButton,
+      Collapse,
+      Divider
     } from '@chakra-ui/react'
     import { motion } from 'framer-motion'
-    import { FaUsers, FaCalculator, FaChartLine, FaUndo } from 'react-icons/fa'
+    import { FaUsers, FaCalculator, FaChartLine, FaUndo, FaAngleDown, FaAngleUp } from 'react-icons/fa'
     import ParticipantList from './ParticipantList'
     import SettlementPlan from './SettlementPlan'
     import CurrencySelect from './CurrencySelect'
@@ -30,7 +32,8 @@ import React, { useState, useEffect, useRef } from 'react'
       return (
         <Box 
           bg={bgColor} 
-          p={3}
+          px={4}
+          py={2}
           borderRadius="xl" 
           shadow="md" 
           flex="1"
@@ -38,29 +41,26 @@ import React, { useState, useEffect, useRef } from 'react'
           borderColor={borderColor}
           position="relative"
           overflow="hidden"
+          minW="140px"
           _hover={{
             transform: 'translateY(-2px)',
             shadow: 'lg',
             transition: 'all 0.2s'
           }}
         >
-          <Box
-            position="absolute"
-            top={1}
-            right={1}
-            opacity={0.1}
-            fontSize="xl"
-          >
-            {icon}
-          </Box>
-          <VStack align="start" spacing={0}>
-            <Text fontSize="xs" color={labelColor} fontWeight="medium">
-              {label}
-            </Text>
-            <Text fontSize="lg" fontWeight="bold">
-              {value}
-            </Text>
-          </VStack>
+          <HStack spacing={3} align="center">
+            <Box opacity={0.5}>
+              {icon}
+            </Box>
+            <VStack align="start" spacing={0}>
+              <Text fontSize="xs" color={labelColor} fontWeight="medium">
+                {label}
+              </Text>
+              <Text fontSize="lg" fontWeight="bold">
+                {value}
+              </Text>
+            </VStack>
+          </HStack>
         </Box>
       )
     }
@@ -75,12 +75,16 @@ import React, { useState, useEffect, useRef } from 'react'
         average: 0
       })
       const [currency, setCurrency] = useState('INR')
+      const [showResults, setShowResults] = useState(true)
+      const resultsRef = useRef(null)
       const toast = useToast()
+
+      const bgColor = useColorModeValue('white', 'gray.700')
       const statsBg = useColorModeValue('gray.50', 'gray.800')
       const clearButtonBg = useColorModeValue('white', 'gray.700')
       const clearButtonHoverBg = useColorModeValue('red.50', 'red.900')
       const borderColor = useColorModeValue('gray.200', 'gray.600')
-      const settlementRef = useRef(null)
+      const resultsBg = useColorModeValue('blue.50', 'blue.900')
 
       const getCurrencySymbol = (code) => {
         const curr = currencies.find(c => c.code === code)
@@ -115,15 +119,20 @@ import React, { useState, useEffect, useRef } from 'react'
 
         const result = calculateSettlements(participants)
         setSettlements(result)
-
-        if (settlementRef.current) {
-          settlementRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        }
+        setShowResults(true)
+        
+        setTimeout(() => {
+          resultsRef.current?.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+          })
+        }, 100)
       }
 
       const clearAll = () => {
         setParticipants([{ id: Date.now(), name: '', amount: '' }])
         setSettlements([])
+        setShowResults(true)
         toast({
           title: 'Cleared All',
           description: 'All participants have been cleared',
@@ -145,12 +154,45 @@ import React, { useState, useEffect, useRef } from 'react'
       }
 
       return (
-        <VStack spacing={8} w="100%">
+        <VStack spacing={6} w="100%">
+          <Box ref={resultsRef} w="100%" scroll-margin-top="2rem">
+            <Collapse in={settlements.length > 0} animateOpacity>
+              <Box 
+                w="100%" 
+                bg={resultsBg} 
+                borderRadius="xl" 
+                p={4} 
+                mb={4}
+                position="relative"
+                shadow="lg"
+              >
+                <Flex justify="space-between" align="center" mb={2}>
+                  <Text fontSize="lg" fontWeight="bold">
+                    Settlement Plan
+                  </Text>
+                  <IconButton
+                    icon={showResults ? <FaAngleUp /> : <FaAngleDown />}
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowResults(!showResults)}
+                    aria-label={showResults ? "Hide results" : "Show results"}
+                  />
+                </Flex>
+                <Collapse in={showResults}>
+                  <SettlementPlan 
+                    settlements={settlements} 
+                    currencySymbol={getCurrencySymbol(currency)}
+                  />
+                </Collapse>
+              </Box>
+            </Collapse>
+          </Box>
+
           <Flex 
             w="100%" 
             justify="space-between" 
             align="center"
-            direction={{ base: 'column', sm: 'row' }}
+            direction={{ base: 'column', md: 'row' }}
             gap={4}
           >
             <HStack spacing={4}>
@@ -179,9 +221,10 @@ import React, { useState, useEffect, useRef } from 'react'
               </Tooltip>
             </HStack>
             <Flex 
-              gap={2} 
-              flexDirection="row"
+              gap={3} 
+              flexDirection={{ base: 'column', sm: 'row' }}
               align="center"
+              w={{ base: '100%', md: 'auto' }}
             >
               <StatBox
                 label="Total Expenses"
@@ -194,13 +237,13 @@ import React, { useState, useEffect, useRef } from 'react'
                     {getCurrencySymbol(currency)}{stats.total.toFixed(2)}
                   </MotionBox>
                 }
-                icon={<FaChartLine />}
+                icon={<FaChartLine size="1.2em" />}
                 accentColor="green"
               />
               <StatBox
                 label="Average Per Person"
                 value={`${getCurrencySymbol(currency)}${stats.average.toFixed(2)}`}
-                icon={<FaCalculator />}
+                icon={<FaCalculator size="1.2em" />}
                 accentColor="blue"
               />
               <StatBox
@@ -209,17 +252,20 @@ import React, { useState, useEffect, useRef } from 'react'
                   <Badge 
                     colorScheme="purple" 
                     fontSize="md" 
-                    p={1} 
+                    px={2}
+                    py={1}
                     borderRadius="lg"
                   >
                     {participants.length}
                   </Badge>
                 }
-                icon={<FaUsers />}
+                icon={<FaUsers size="1.2em" />}
                 accentColor="purple"
               />
             </Flex>
           </Flex>
+
+          <Divider />
 
           <ParticipantList 
             participants={participants} 
@@ -238,21 +284,6 @@ import React, { useState, useEffect, useRef } from 'react'
           >
             Calculate Split
           </Button>
-
-          {settlements.length > 0 && (
-            <MotionBox
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              w="100%"
-              ref={settlementRef}
-            >
-              <SettlementPlan 
-                settlements={settlements} 
-                currencySymbol={getCurrencySymbol(currency)}
-              />
-            </MotionBox>
-          )}
         </VStack>
       )
     }
